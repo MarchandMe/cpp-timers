@@ -41,15 +41,6 @@ namespace Timers {
 		}
 	};
 
-	//remember to use mutexs!
-	class CompareTimer //for use between threads
-	{
-	private:
-		manualTimer t1, t2;
-	public:
-
-	};
-
 	template<typename reType, typename... Ts> //note that functions will need same signitures, add dummy inputs as needed :)
 	class Comparator { //takes function pointers
 	private:
