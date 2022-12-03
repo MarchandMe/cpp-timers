@@ -19,5 +19,6 @@ int main() { //drive & test
 	cm.addFunc(b, 1);
 	cm.addFunc(c, 1);
 	cm.run();
+	cm.runParallel();
 	std::cin.get();
 }

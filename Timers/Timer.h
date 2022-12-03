@@ -58,17 +58,23 @@ namespace Timers {
 		std::vector<reType(*)(Ts...)> funcs; //vector of all functions
 		std::vector<Ts...> funcArgs;
 		std::vector<int> Times;
+		std::vector<std::thread> threads;
 
 		void const parallelFunc(int address) { //address of the func pointer
 			manualTimer ptimer;
 			ptimer.startTimer();
-			funcs[address](funcArgs[address]);
+			funcs[funcs.size() - address - 1](funcArgs[funcs.size() - address - 1]); //in the correct order
 			Times.emplace_back(ptimer.endTimer());
 		}
 	public:
 		void addFunc(reType(*func)(Ts...), Ts... arg) { 
 			funcs.emplace_back(func);
 			funcArgs.emplace_back(arg...);
+		}
+		void runParallel() {
+			for (int i = 0; i < funcs.size(); i++)
+				threads.push_back(std::thread(&Comparator::parallelFunc, this, i));
+			for (auto& t : threads) t.join();
 		}
 		void const run() {
 			for (int i = 0; i < funcs.size(); i++) {
