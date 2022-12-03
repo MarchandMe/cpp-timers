@@ -2,8 +2,8 @@
 #include <chrono>
 #include <iostream>
 #include <vector>
-#include <mutex>
 #include <thread>
+//everything is in milliseconds
 namespace Timers {
 	class autoTimer //basic timer, outputs to console, ends when destructed
 	{
@@ -32,7 +32,7 @@ namespace Timers {
 			start = true;
 			timeStart = std::chrono::high_resolution_clock::now();
 		}
-		int endTimer() {
+		double endTimer() {
 			if (!start) printf("the timer was not started");
 			timeEnd = std::chrono::high_resolution_clock::now();
 			dur = timeEnd - timeStart;
@@ -41,14 +41,15 @@ namespace Timers {
 		}
 	};
 
-	template<typename reType, typename... Ts> //note that functions will need same signitures, add dummy inputs as needed :)
+	//TODO: write parallel async, automatic thread pool
+	template<typename reType, typename... Ts> //note that functions will need same signatures, add dummy inputs as needed :)
 	class Comparator { //takes function pointers
 	private:
 		manualTimer timer;
 
 		std::vector<reType(*)(Ts...)> funcs; //vector of all functions
 		std::vector<Ts...> funcArgs;
-		std::vector<int> Times;
+		std::vector<double> Times;
 		std::vector<std::thread> threads;
 
 		void const parallelFunc(int address) { //address of the func pointer
@@ -62,7 +63,7 @@ namespace Timers {
 			funcs.emplace_back(func);
 			funcArgs.emplace_back(arg...);
 		}
-		void runParallel() {
+		void const runParallel() {
 			for (int i = 0; i < funcs.size(); i++)
 				threads.push_back(std::thread(&Comparator::parallelFunc, this, i));
 			for (auto& t : threads) t.join();
@@ -74,8 +75,8 @@ namespace Timers {
 				Times.emplace_back(timer.endTimer());
 			}
 		}
-		int* const getTimes() {
-			return Times.data();
+		std::vector<double> const getTimes() {
+			return Times;
 		}
 	};
 }

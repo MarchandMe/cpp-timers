@@ -1,6 +1,5 @@
 #include <iostream>
-#include <thread>
-#include <mutex>
+#include <vector>
 #include "Timer.h"
 
 void a(int a) {
@@ -10,7 +9,7 @@ void b(int a) {
 	std::cout << a << "\n";
 }
 void c(int a) {
-	printf("%i \n",a);
+	printf("%i \n", a);
 }
 
 int main() { //drive & test
@@ -18,7 +17,9 @@ int main() { //drive & test
 	cm.addFunc(a, 1);
 	cm.addFunc(b, 1);
 	cm.addFunc(c, 1);
-	cm.run();
-	cm.runParallel();
+	//cm.run(); // for one-by-one testing
+	cm.runParallel(); // for parallel testing
+	std::vector<double> t = cm.getTimes();
+	for (double i : t) printf("%lf\n", i);
 	std::cin.get();
 }
