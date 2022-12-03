@@ -68,48 +68,50 @@ namespace Timers {
 	class Comparator { //takes function pointers
 	private:
 		manualTimer timer;
-		/*
+		
 		struct process{
-			reType(*)(Ts...) p_func;
-			Ts... func_Args;
-			double Time;
-			std::thread rthread
+			reType(*p_func)(Ts...);
+			std::vector<Ts...> funcArgs; //too lazy to write this :)
+			double time;
 		};
-		std::vector<process> processes; */
-
-		std::vector<reType(*)(Ts...)> funcs; //vector of all functions
-		std::vector<Ts...> funcArgs;
-		std::vector<double> Times;
+		std::vector<process> processes; 
 		std::vector<std::thread> threads;
 
 		void const parallelFunc(int address) { //address of the func pointer
 			manualTimer ptimer;
 			ptimer.startTimer();
-			funcs[funcs.size() - address - 1](funcArgs[funcs.size() - address - 1]); //in the correct order
-			Times.emplace_back(ptimer.endTimerNoOutput());
+			processes[processes.size() - address - 1].p_func(processes[processes.size() - address - 1].funcArgs[0]); //in the correct order
+			processes[processes.size() - address - 1].time = (ptimer.endTimerNoOutput());
 		}
 	public:
-		void addFunc(reType(*func)(Ts...), Ts... arg) { 
-			funcs.emplace_back(func);
-			funcArgs.emplace_back(arg...);
+		void addFunc(reType(*func)(Ts...), Ts... arg) {
+			processes.resize(processes.size() + 1);
+			processes[processes.size() - 1].p_func = (func);
+			processes[processes.size() - 1].funcArgs.emplace_back(arg...);
 		}
 		void const runParallel() {
-			for (int i = 0; i < funcs.size(); i++)
-				threads.push_back(std::thread(&Comparator::parallelFunc, this, i));
-			for (auto& t : threads) t.join();
-			for (int i = 1; i <= Times.size(); i++) {
-				printf("process number %i took %lf milliseconds\n", i, Times[i-1]);
+			for (int i = 0; i < processes.size(); i++)
+				threads.emplace_back(std::thread(&Comparator::parallelFunc, this, i));
+			for (int i = 0; i < processes.size(); i++) threads[i].join();
+			for (int i = 1; i <= processes.size(); i++) {
+				printf("process number %i took %lf milliseconds\n", i, processes[i-1].time);
 			}
 		}
 		void const run() {
-			for (int i = 0; i < funcs.size(); i++) {
+			for (int i = 0; i < processes.size(); i++) {
 				timer.startTimer();
-				funcs[i](funcArgs[i]);
-				Times.emplace_back(timer.endTimerNoOutput());
+				processes[i].p_func(processes[i].funcArgs[0]); //in the correct order
+				processes[i].time = (timer.endTimerNoOutput());
+			}
+			for (int i = 1; i <= processes.size(); i++) {
+				printf("process number %i took %lf milliseconds\n", i, processes[i - 1].time);
 			}
 		}
-		std::vector<double> const getTimes() {
-			return Times;
+		std::vector<double> getTimes() {
+			std::vector<double> tmp;
+			for (int i = 0; i < processes.size(); i++) tmp.emplace_back(processes[i].time);
+			return tmp;
 		}
+		
 	};
 }

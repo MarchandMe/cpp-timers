@@ -15,10 +15,10 @@ void c(int a) {
 int main() { //drive & test
 	Timers::Comparator<void, int> cm;
 	cm.addFunc(a, 1);
-	cm.addFunc(b, 1);
-	cm.addFunc(c, 1);
-	//cm.run(); // for one-by-one testing
+	cm.addFunc(b, 2);
+	cm.addFunc(c, 3);
 	cm.runParallel(); // for parallel testing
+	cm.run(); // for one-by-one testing
 	std::vector<double> t = cm.getTimes();
 	for (double i : t) printf("%lf\n", i);
 	std::cin.get();
